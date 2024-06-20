@@ -3,7 +3,7 @@
  */
 
 import wheel from 'wheel'
-import animate from 'amator'
+
 import eventify from 'ngraph.events'
 import kinetic from './lib/kinetic.js'
 import createTextSelectionInterceptor from './lib/makeTextSelectionInterceptor.js'
@@ -14,8 +14,6 @@ import makeSvgController, { isSVGElement } from './lib/makeSvgController.js'
 import makeDomController, { isDomElement } from './lib/makeDomController.js'
 
 const defaultZoomSpeed = 1
-const defaultDoubleTapZoomSpeed = 1.75
-const doubleTapSpeedInMS = 300
 const clickEventTimeInMS = 200
 
 /**
@@ -54,9 +52,7 @@ export default function createPanZoom(domElement, options) {
 
   const filterKey =
     typeof options.filterKey === 'function' ? options.filterKey : noop
-  // TODO: likely need to unite pinchSpeed with zoomSpeed
-  const pinchSpeed =
-    typeof options.pinchSpeed === 'number' ? options.pinchSpeed : 1
+
   const bounds = options.bounds
   let maxZoom =
     typeof options.maxZoom === 'number'
@@ -66,10 +62,7 @@ export default function createPanZoom(domElement, options) {
 
   const boundsPadding =
     typeof options.boundsPadding === 'number' ? options.boundsPadding : 0.05
-  const zoomDoubleClickSpeed =
-    typeof options.zoomDoubleClickSpeed === 'number'
-      ? options.zoomDoubleClickSpeed
-      : defaultDoubleTapZoomSpeed
+
   const beforeWheel = options.beforeWheel || noop
   const beforeMouseDown = options.beforeMouseDown || noop
   let speed =
@@ -86,13 +79,9 @@ export default function createPanZoom(domElement, options) {
   }
 
   let frameAnimation
-  let lastTouchEndTime = 0
-  let lastTouchStartTime = 0
   let pendingClickEventTimeout = 0
   let lastMouseDownedEvent = null
   let lastMouseDownTime = new Date()
-  let lastSingleFingerOffset
-  let touchInProgress = false
 
   // We only need to fire panstart when actual move happens
   let panstartFired = false
@@ -105,9 +94,6 @@ export default function createPanZoom(domElement, options) {
   // between pan and click
   let clickX
   let clickY
-
-  let pinchZoomLength
-
   let smoothScroll
   if ('smoothScroll' in options && !options.smoothScroll) {
     // If user explicitly asked us not to use smooth scrolling, we obey
@@ -117,42 +103,25 @@ export default function createPanZoom(domElement, options) {
     // which makes scroll smoothing.
     smoothScroll = kinetic(getPoint, scroll, options.smoothScroll)
   }
-
-  let moveByAnimation
   let zoomToAnimation
 
   let multiTouch
-  let paused = false
-
   listenForEvents()
 
   const api = {
     dispose: dispose,
-    moveBy: internalMoveBy,
     moveTo: moveTo,
-    smoothMoveTo: smoothMoveTo,
     centerOn: centerOn,
     zoomTo: publicZoomTo,
     zoomAbs: zoomAbs,
-    smoothZoom: smoothZoom,
-    smoothZoomAbs: smoothZoomAbs,
     showRectangle: showRectangle,
-
-    pause: pause,
-    resume: resume,
-    isPaused: isPaused,
-
     getTransform: getTransformModel,
-
     getMinZoom: getMinZoom,
     setMinZoom: setMinZoom,
-
     getMaxZoom: getMaxZoom,
     setMaxZoom: setMaxZoom,
-
     getTransformOrigin: getTransformOrigin,
     setTransformOrigin: setTransformOrigin,
-
     getZoomSpeed: getZoomSpeed,
     setZoomSpeed: setZoomSpeed
   }
@@ -177,22 +146,6 @@ export default function createPanZoom(domElement, options) {
   }
 
   return api
-
-  function pause() {
-    releaseEvents()
-    paused = true
-  }
-
-  function resume() {
-    if (paused) {
-      listenForEvents()
-      paused = false
-    }
-  }
-
-  function isPaused() {
-    return paused
-  }
 
   function showRectangle(rect) {
     // TODO: this duplicates autocenter. I think autocenter should go.
@@ -319,10 +272,6 @@ export default function createPanZoom(domElement, options) {
     makeDirty()
   }
 
-  function moveBy(dx, dy) {
-    moveTo(transform.x + dx, transform.y + dy)
-  }
-
   function keepTransformInsideBounds() {
     const boundingBox = getBoundingBox()
     if (!boundingBox) return
@@ -345,10 +294,6 @@ export default function createPanZoom(domElement, options) {
     // y axis:
     diff = boundingBox.top - clientRect.bottom
     if (diff > 0) {
-      // we adjust transform, so that it matches exactly our bounding box:
-      // transform.y = boundingBox.top - (boundingBox.height + boundingBox.y) * transform.scale =>
-      // transform.y = boundingBox.top - (clientRect.bottom - transform.y) =>
-      // transform.y = diff + transform.y =>
       transform.y += diff
       adjusted = true
     }
@@ -454,43 +399,6 @@ export default function createPanZoom(domElement, options) {
     const parent = ui.ownerSVGElement
     if (!parent)
       throw new Error('ui element is required to be within the scene')
-
-    // TODO: should i use controller's screen CTM?
-    const clientRect = ui.getBoundingClientRect()
-    const cx = clientRect.left + clientRect.width / 2
-    const cy = clientRect.top + clientRect.height / 2
-
-    const container = parent.getBoundingClientRect()
-    const dx = container.width / 2 - cx
-    const dy = container.height / 2 - cy
-
-    internalMoveBy(dx, dy, true)
-  }
-
-  function smoothMoveTo(x, y) {
-    internalMoveBy(x - transform.x, y - transform.y, true)
-  }
-
-  function internalMoveBy(dx, dy, smooth) {
-    if (!smooth) {
-      return moveBy(dx, dy)
-    }
-
-    if (moveByAnimation) moveByAnimation.cancel()
-
-    const from = { x: 0, y: 0 }
-    const to = { x: dx, y: dy }
-    let lastX = 0
-    let lastY = 0
-
-    moveByAnimation = animate(from, to, {
-      step: function (v) {
-        moveBy(v.x - lastX, v.y - lastY)
-
-        lastX = v.x
-        lastY = v.y
-      }
-    })
   }
 
   function scroll(x, y) {
@@ -504,8 +412,6 @@ export default function createPanZoom(domElement, options) {
 
   function listenForEvents() {
     owner.addEventListener('mousedown', onMouseDown, { passive: false })
-    owner.addEventListener('dblclick', onDoubleClick, { passive: false })
-    owner.addEventListener('touchstart', onTouch, { passive: false })
     owner.addEventListener('keydown', onKeyDown, { passive: false })
 
     // Need to listen on the owner container, so that we are not limited
@@ -519,8 +425,6 @@ export default function createPanZoom(domElement, options) {
     wheel.removeWheelListener(owner, onMouseWheel)
     owner.removeEventListener('mousedown', onMouseDown)
     owner.removeEventListener('keydown', onKeyDown)
-    owner.removeEventListener('dblclick', onDoubleClick)
-    owner.removeEventListener('touchstart', onTouch)
 
     if (frameAnimation) {
       window.cancelAnimationFrame(frameAnimation)
@@ -530,7 +434,6 @@ export default function createPanZoom(domElement, options) {
     smoothScroll.cancel()
 
     releaseDocumentMouse()
-    releaseTouches()
     textSelection.release()
 
     triggerPanEnd()
@@ -578,16 +481,6 @@ export default function createPanZoom(domElement, options) {
     if (x || y) {
       e.preventDefault()
       e.stopPropagation()
-
-      const clientRect = owner.getBoundingClientRect()
-      // movement speed should be the same in both X and Y direction:
-      const offset = Math.min(clientRect.width, clientRect.height)
-      const moveSpeedRatio = 0.05
-      const dx = offset * moveSpeedRatio * x
-      const dy = offset * moveSpeedRatio * y
-
-      // TODO: currently we do not animate this. It could be better to have animation
-      internalMoveBy(dx, dy)
     }
 
     if (z) {
@@ -605,121 +498,6 @@ export default function createPanZoom(domElement, options) {
     }
   }
 
-  function onTouch(e) {
-    // let them override the touch behavior
-    beforeTouch(e)
-    clearPendingClickEventTimeout()
-
-    if (e.touches.length === 1) {
-      return handleSingleFingerTouch(e, e.touches[0])
-    } else if (e.touches.length === 2) {
-      // handleTouchMove() will care about pinch zoom.
-      pinchZoomLength = getPinchZoomLength(e.touches[0], e.touches[1])
-      multiTouch = true
-      startTouchListenerIfNeeded()
-    }
-  }
-
-  function beforeTouch(e) {
-    // TODO: Need to unify this filtering names. E.g. use `beforeTouch`
-    if (options.onTouch && !options.onTouch(e)) {
-      // if they return `false` from onTouch, we don't want to stop
-      // events propagation. Fixes https://github.com/anvaka/panzoom/issues/12
-      return
-    }
-
-    e.stopPropagation()
-    e.preventDefault()
-  }
-
-  function beforeDoubleClick(e) {
-    clearPendingClickEventTimeout()
-
-    // TODO: Need to unify this filtering names. E.g. use `beforeDoubleClick``
-    if (options.onDoubleClick && !options.onDoubleClick(e)) {
-      // if they return `false` from onTouch, we don't want to stop
-      // events propagation. Fixes https://github.com/anvaka/panzoom/issues/46
-      return
-    }
-
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
-  function handleSingleFingerTouch(e, p0?: any) {
-    lastTouchStartTime = new Date()
-    const touch = e.touches[0]
-    const offset = getOffsetXY(touch)
-    lastSingleFingerOffset = offset
-    const point = transformToScreen(offset.x, offset.y)
-    mouseX = point.x
-    mouseY = point.y
-    clickX = mouseX
-    clickY = mouseY
-
-    smoothScroll.cancel()
-    startTouchListenerIfNeeded()
-  }
-
-  function startTouchListenerIfNeeded() {
-    if (touchInProgress) {
-      // no need to do anything, as we already listen to events;
-      return
-    }
-
-    touchInProgress = true
-    document.addEventListener('touchmove', handleTouchMove)
-    document.addEventListener('touchend', handleTouchEnd)
-    document.addEventListener('touchcancel', handleTouchEnd)
-  }
-
-  function handleTouchMove(e) {
-    if (e.touches.length === 1) {
-      e.stopPropagation()
-      const touch = e.touches[0]
-
-      var offset = getOffsetXY(touch)
-      const point = transformToScreen(offset.x, offset.y)
-
-      const dx = point.x - mouseX
-      const dy = point.y - mouseY
-
-      if (dx !== 0 && dy !== 0) {
-        triggerPanStart()
-      }
-      mouseX = point.x
-      mouseY = point.y
-      internalMoveBy(dx, dy)
-    } else if (e.touches.length === 2) {
-      // it's a zoom, let's find direction
-      multiTouch = true
-      const t1 = e.touches[0]
-      const t2 = e.touches[1]
-      const currentPinchLength = getPinchZoomLength(t1, t2)
-
-      // since the zoom speed is always based on distance from 1, we need to apply
-      // pinch speed only on that distance from 1:
-      const scaleMultiplier =
-        1 + (currentPinchLength / pinchZoomLength - 1) * pinchSpeed
-
-      const firstTouchPoint = getOffsetXY(t1)
-      const secondTouchPoint = getOffsetXY(t2)
-      mouseX = (firstTouchPoint.x + secondTouchPoint.x) / 2
-      mouseY = (firstTouchPoint.y + secondTouchPoint.y) / 2
-      if (transformOrigin) {
-        var offset = getTransformOriginOffset()
-        mouseX = offset.x
-        mouseY = offset.y
-      }
-
-      publicZoomTo(mouseX, mouseY, scaleMultiplier)
-
-      pinchZoomLength = currentPinchLength
-      e.stopPropagation()
-      e.preventDefault()
-    }
-  }
-
   function clearPendingClickEventTimeout() {
     if (pendingClickEventTimeout) {
       clearTimeout(pendingClickEventTimeout)
@@ -727,7 +505,7 @@ export default function createPanZoom(domElement, options) {
     }
   }
 
-  function handlePotentialClickEvent(e) {
+  function handlePotentialClickEvent() {
     // we could still be in the double tap mode, let's wait until double tap expires,
     // and then notify:
     if (!options.onClick) return
@@ -736,62 +514,8 @@ export default function createPanZoom(domElement, options) {
     const dy = mouseY - clickY
     const l = Math.sqrt(dx * dx + dy * dy)
     if (l > 5) return // probably they are panning, ignore it
-
-    pendingClickEventTimeout = setTimeout(function () {
-      pendingClickEventTimeout = 0
-      options.onClick(e)
-    }, doubleTapSpeedInMS)
   }
 
-  function handleTouchEnd(e) {
-    clearPendingClickEventTimeout()
-    if (e.touches.length > 0) {
-      var offset = getOffsetXY(e.touches[0])
-      const point = transformToScreen(offset.x, offset.y)
-      mouseX = point.x
-      mouseY = point.y
-    } else {
-      const now = new Date()
-      if (now - lastTouchEndTime < doubleTapSpeedInMS) {
-        // They did a double tap here
-        if (transformOrigin) {
-          var offset = getTransformOriginOffset()
-          smoothZoom(offset.x, offset.y, zoomDoubleClickSpeed)
-        } else {
-          // We want untransformed x/y here.
-          smoothZoom(
-            lastSingleFingerOffset.x,
-            lastSingleFingerOffset.y,
-            zoomDoubleClickSpeed
-          )
-        }
-      } else if (now - lastTouchStartTime < clickEventTimeInMS) {
-        handlePotentialClickEvent(e)
-      }
-
-      lastTouchEndTime = now
-
-      triggerPanEnd()
-      releaseTouches()
-    }
-  }
-
-  function getPinchZoomLength(finger1, finger2) {
-    const dx = finger1.clientX - finger2.clientX
-    const dy = finger1.clientY - finger2.clientY
-    return Math.sqrt(dx * dx + dy * dy)
-  }
-
-  function onDoubleClick(e) {
-    beforeDoubleClick(e)
-    let offset = getOffsetXY(e)
-    if (transformOrigin) {
-      // TODO: looks like this is duplicated in the file.
-      // Need to refactor
-      offset = getTransformOriginOffset()
-    }
-    smoothZoom(offset.x, offset.y, zoomDoubleClickSpeed)
-  }
 
   function onMouseDown(e) {
     clearPendingClickEventTimeout()
@@ -801,13 +525,6 @@ export default function createPanZoom(domElement, options) {
 
     lastMouseDownedEvent = e
     lastMouseDownTime = new Date()
-
-    if (touchInProgress) {
-      // modern browsers will fire mousedown for touch events too
-      // we do not want this: touch is handled separately.
-      e.stopPropagation()
-      return false
-    }
     // for IE, left click == 1
     // for Firefox, left click == 0
     const isLeftButton =
@@ -831,20 +548,11 @@ export default function createPanZoom(domElement, options) {
   }
 
   function onMouseMove(e) {
-    // no need to worry about mouse events when touch is happening
-    if (touchInProgress) return
-
     triggerPanStart()
-
     const offset = getOffsetXY(e)
     const point = transformToScreen(offset.x, offset.y)
-    const dx = point.x - mouseX
-    const dy = point.y - mouseY
-
     mouseX = point.x
     mouseY = point.y
-
-    internalMoveBy(dx, dy)
   }
 
   function onMouseUp() {
@@ -862,14 +570,6 @@ export default function createPanZoom(domElement, options) {
     panstartFired = false
   }
 
-  function releaseTouches() {
-    document.removeEventListener('touchmove', handleTouchMove)
-    document.removeEventListener('touchend', handleTouchEnd)
-    document.removeEventListener('touchcancel', handleTouchEnd)
-    panstartFired = false
-    multiTouch = false
-    touchInProgress = false
-  }
 
   function onMouseWheel(e) {
     // if client does not want to handle this event - just ignore the call
@@ -892,44 +592,12 @@ export default function createPanZoom(domElement, options) {
   }
 
   function getOffsetXY(e) {
-    let offsetX, offsetY
     // I tried using e.offsetX, but that gives wrong results for svg, when user clicks on a path.
     const ownerRect = owner.getBoundingClientRect()
-    offsetX = e.clientX - ownerRect.left
-    offsetY = e.clientY - ownerRect.top
+    const offsetX = e.clientX - ownerRect.left
+    const offsetY = e.clientY - ownerRect.top
 
     return { x: offsetX, y: offsetY }
-  }
-
-  function smoothZoom(clientX, clientY, scaleMultiplier) {
-    const fromValue = transform.scale
-    const from = { scale: fromValue }
-    const to = { scale: scaleMultiplier * fromValue }
-
-    smoothScroll.cancel()
-    cancelZoomAnimation()
-
-    zoomToAnimation = animate(from, to, {
-      step: function (v) {
-        zoomAbs(clientX, clientY, v.scale)
-      },
-      done: triggerZoomEnd
-    })
-  }
-
-  function smoothZoomAbs(clientX, clientY, toScaleValue) {
-    const fromValue = transform.scale
-    const from = { scale: fromValue }
-    const to = { scale: toScaleValue }
-
-    smoothScroll.cancel()
-    cancelZoomAnimation()
-
-    zoomToAnimation = animate(from, to, {
-      step: function (v) {
-        zoomAbs(clientX, clientY, v.scale)
-      }
-    })
   }
 
   function getTransformOriginOffset() {
@@ -973,10 +641,6 @@ export default function createPanZoom(domElement, options) {
       if (!multiTouch) smoothScroll.stop()
       triggerEvent('panend')
     }
-  }
-
-  function triggerZoomEnd() {
-    triggerEvent('zoomend')
   }
 
   function triggerEvent(name) {
