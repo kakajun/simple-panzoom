@@ -1,7 +1,16 @@
 /**
  * Allows smooth kinetic scrolling of the surface
  */
-export default function kinetic(getPoint, scroll, settings) {
+export default function kinetic(
+  getPoint: () => void,
+  scroll: (arg0: any, arg1: any) => void,
+  settings: {
+    minVelocity?: number
+    amplitude?: number
+    cancelAnimationFrame?: () => void
+    requestAnimationFrame?: any
+  }
+) {
   if (typeof settings !== 'object') {
     // setting could come as boolean, we should ignore it, and use an object.
     settings = {}
@@ -20,15 +29,15 @@ export default function kinetic(getPoint, scroll, settings) {
       ? settings.requestAnimationFrame
       : getRequestAnimationFrame()
 
-  let lastPoint
-  let timestamp
+  let lastPoint: { x: number; y: number }
+  let timestamp: number | Date
   const timeConstant = 342
 
-  let ticker
-  let vx, targetX, ax
-  let vy, targetY, ay
+  let ticker: any
+  let vx: number, targetX: number, ax: number
+  let vy: number, targetY: number, ay: number
 
-  let raf
+  let raf: any
 
   return {
     start: start,
@@ -136,7 +145,7 @@ function getCancelAnimationFrame() {
 function getRequestAnimationFrame() {
   if (typeof requestAnimationFrame === 'function') return requestAnimationFrame
 
-  return function (handler) {
+  return function (handler: () => void) {
     return setTimeout(handler, 16)
   }
 }

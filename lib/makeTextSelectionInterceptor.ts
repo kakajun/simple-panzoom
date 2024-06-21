@@ -2,7 +2,7 @@
  * Disallows selecting text.
  */
 
-export default function makeTextSelectionInterceptor(useFake) {
+export default function makeTextSelectionInterceptor(useFake: any) {
   if (useFake) {
     return {
       capture: noop,
@@ -10,9 +10,9 @@ export default function makeTextSelectionInterceptor(useFake) {
     }
   }
 
-  let dragObject
-  let prevSelectStart
-  let prevDragStart
+  let dragObject: { ondragstart: (e: any) => boolean }
+  let prevSelectStart: ((this: GlobalEventHandlers, ev: Event) => any) | null
+  let prevDragStart: ((this: GlobalEventHandlers, ev: DragEvent) => any) | null
   let wasCaptured = false
 
   return {
@@ -20,7 +20,7 @@ export default function makeTextSelectionInterceptor(useFake) {
     release: release
   }
 
-  function capture(domObject) {
+  function capture(domObject: any) {
     wasCaptured = true
     prevSelectStart = window.document.onselectstart
     prevDragStart = window.document.ondragstart
@@ -40,7 +40,7 @@ export default function makeTextSelectionInterceptor(useFake) {
   }
 }
 
-function disabled(e) {
+function disabled(e: { stopPropagation: () => void }) {
   e.stopPropagation()
   return false
 }
