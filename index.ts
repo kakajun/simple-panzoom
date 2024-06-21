@@ -22,7 +22,7 @@ const clickEventTimeInMS = 200
  * @param {DOMElement} domElement where panzoom should be attached.
  * @param {Object} options that configure behavior.
  */
-export default function createPanZoom(domElement, options) {
+export default function createPanZoom(domElement: any, options: { controller?: any; filterKey?: any; bounds?: any; maxZoom?: any; minZoom?: any; boundsPadding?: any; beforeWheel?: any; beforeMouseDown?: any; zoomSpeed?: any; transformOrigin?: any; enableTextSelection?: any; autocenter?: any; smoothScroll?: any; initialX?: any; initialY?: any; initialZoom?: any; onClick?: any }) {
   options = options || {}
 
   let panController = options.controller
@@ -78,7 +78,7 @@ export default function createPanZoom(domElement, options) {
     autocenter()
   }
 
-  let frameAnimation
+  let frameAnimation: number
   let pendingClickEventTimeout = 0
   let lastMouseDownedEvent = null
   let lastMouseDownTime = new Date()
@@ -87,14 +87,14 @@ export default function createPanZoom(domElement, options) {
   let panstartFired = false
 
   // cache mouse coordinates here
-  let mouseX
-  let mouseY
+  let mouseX: number
+  let mouseY: number
 
   // Where the first click has happened, so that we can differentiate
-  // between pan and click
-  let clickX
-  let clickY
-  let smoothScroll
+
+  let clickX: number
+  let clickY: number
+  let smoothScroll: { cancel: any; start: any; stop: any }
   if ('smoothScroll' in options && !options.smoothScroll) {
     // If user explicitly asked us not to use smooth scrolling, we obey
     smoothScroll = rigidScroll()
@@ -103,9 +103,9 @@ export default function createPanZoom(domElement, options) {
     // which makes scroll smoothing.
     smoothScroll = kinetic(getPoint, scroll, options.smoothScroll)
   }
-  let zoomToAnimation
+  let zoomToAnimation: { cancel: () => void } | null
 
-  let multiTouch
+  let multiTouch: any
   listenForEvents()
 
   const api = {
@@ -147,7 +147,7 @@ export default function createPanZoom(domElement, options) {
 
   return api
 
-  function showRectangle(rect) {
+  function showRectangle(rect: { right: number; left: number; bottom: number; top: number }) {
     // TODO: this duplicates autocenter. I think autocenter should go.
     const clientRect = owner.getBoundingClientRect()
     const size = transformToScreen(clientRect.width, clientRect.height)
@@ -166,7 +166,7 @@ export default function createPanZoom(domElement, options) {
     transform.scale = scale
   }
 
-  function transformToScreen(x, y) {
+  function transformToScreen(x: number, y: number) {
     if (panController.getScreenCTM) {
       const parentCTM = panController.getScreenCTM()
       const parentScaleX = parentCTM.a
@@ -184,8 +184,8 @@ export default function createPanZoom(domElement, options) {
   }
 
   function autocenter() {
-    let w // width of the parent
-    let h // height of the parent
+    let w: number // width of the parent
+    let h: number // height of the parent
     let left = 0
     let top = 0
     const sceneBoundingBox = getBoundingBox()
@@ -224,7 +224,7 @@ export default function createPanZoom(domElement, options) {
     return minZoom
   }
 
-  function setMinZoom(newMinZoom) {
+  function setMinZoom(newMinZoom: any) {
     minZoom = newMinZoom
   }
 
@@ -232,7 +232,7 @@ export default function createPanZoom(domElement, options) {
     return maxZoom
   }
 
-  function setMaxZoom(newMaxZoom) {
+  function setMaxZoom(newMaxZoom: any) {
     maxZoom = newMaxZoom
   }
 
@@ -240,7 +240,7 @@ export default function createPanZoom(domElement, options) {
     return transformOrigin
   }
 
-  function setTransformOrigin(newTransformOrigin) {
+  function setTransformOrigin(newTransformOrigin: any) {
     transformOrigin = parseTransformOrigin(newTransformOrigin)
   }
 
@@ -248,7 +248,7 @@ export default function createPanZoom(domElement, options) {
     return speed
   }
 
-  function setZoomSpeed(newSpeed) {
+  function setZoomSpeed(newSpeed: unknown) {
     if (!Number.isFinite(newSpeed)) {
       throw new Error('Zoom speed should be a number')
     }
@@ -262,13 +262,11 @@ export default function createPanZoom(domElement, options) {
     }
   }
 
-  function moveTo(x, y) {
+  function moveTo(x: number, y: number) {
     transform.x = x
     transform.y = y
 
     keepTransformInsideBounds()
-
-    triggerEvent('pan')
     makeDirty()
   }
 
@@ -341,7 +339,7 @@ export default function createPanZoom(domElement, options) {
     }
   }
 
-  function client(x, y) {
+  function client(x: number, y: number) {
     return {
       x: x * transform.scale + transform.x,
       y: y * transform.scale + transform.y
@@ -353,7 +351,7 @@ export default function createPanZoom(domElement, options) {
     frameAnimation = window.requestAnimationFrame(frame)
   }
 
-  function zoomByRatio(clientX, clientY, ratio) {
+  function zoomByRatio(clientX: any, clientY: any, ratio: number) {
     if (isNaN(clientX) || isNaN(clientY) || isNaN(ratio)) {
       throw new Error('zoom requires valid numbers')
     }
@@ -390,18 +388,18 @@ export default function createPanZoom(domElement, options) {
     makeDirty()
   }
 
-  function zoomAbs(clientX, clientY, zoomLevel) {
+  function zoomAbs(clientX: any, clientY: any, zoomLevel: number) {
     const ratio = zoomLevel / transform.scale
     zoomByRatio(clientX, clientY, ratio)
   }
 
-  function centerOn(ui) {
+  function centerOn(ui: { ownerSVGElement: any }) {
     const parent = ui.ownerSVGElement
     if (!parent)
       throw new Error('ui element is required to be within the scene')
   }
 
-  function scroll(x, y) {
+  function scroll(x: any, y: any) {
     cancelZoomAnimation()
     moveTo(x, y)
   }
@@ -453,7 +451,7 @@ export default function createPanZoom(domElement, options) {
     frameAnimation = 0
   }
 
-  function onKeyDown(e) {
+  function onKeyDown(e: { keyCode: number; preventDefault: () => void; stopPropagation: () => void }) {
     let x = 0,
       y = 0,
       z = 0
@@ -517,7 +515,7 @@ export default function createPanZoom(domElement, options) {
   }
 
 
-  function onMouseDown(e) {
+  function onMouseDown(e: { button: number; target: any; srcElement: any } | null) {
     clearPendingClickEventTimeout()
 
     // if client does not want to handle this event - just ignore the call
@@ -547,7 +545,7 @@ export default function createPanZoom(domElement, options) {
     return false
   }
 
-  function onMouseMove(e) {
+  function onMouseMove(e: any) {
     triggerPanStart()
     const offset = getOffsetXY(e)
     const point = transformToScreen(offset.x, offset.y)
@@ -571,7 +569,7 @@ export default function createPanZoom(domElement, options) {
   }
 
 
-  function onMouseWheel(e) {
+  function onMouseWheel(e: { deltaY: any; deltaMode: number; preventDefault: () => void }) {
     // if client does not want to handle this event - just ignore the call
     if (beforeWheel(e)) return
 
@@ -591,7 +589,7 @@ export default function createPanZoom(domElement, options) {
     }
   }
 
-  function getOffsetXY(e) {
+  function getOffsetXY(e: { clientX: number; clientY: number }) {
     // I tried using e.offsetX, but that gives wrong results for svg, when user clicks on a path.
     const ownerRect = owner.getBoundingClientRect()
     const offsetX = e.clientX - ownerRect.left
@@ -608,7 +606,7 @@ export default function createPanZoom(domElement, options) {
     }
   }
 
-  function publicZoomTo(clientX, clientY, scaleMultiplier) {
+  function publicZoomTo(clientX: number, clientY: number, scaleMultiplier: number) {
     smoothScroll.cancel()
     cancelZoomAnimation()
     return zoomByRatio(clientX, clientY, scaleMultiplier)
@@ -621,7 +619,7 @@ export default function createPanZoom(domElement, options) {
     }
   }
 
-  function getScaleMultiplier(delta) {
+  function getScaleMultiplier(delta: number) {
     const sign = Math.sign(delta)
     const deltaAdjustedSpeed = Math.min(0.25, Math.abs((speed * delta) / 128))
     return 1 - sign * deltaAdjustedSpeed
@@ -643,12 +641,12 @@ export default function createPanZoom(domElement, options) {
     }
   }
 
-  function triggerEvent(name) {
+  function triggerEvent(name: string) {
     api.fire(name, api)
   }
 }
 
-function parseTransformOrigin(options) {
+function parseTransformOrigin(options: { x: any; y: any }) {
   if (!options) return
   if (typeof options === 'object') {
     if (!isNumber(options.x) || !isNumber(options.y))
@@ -659,7 +657,7 @@ function parseTransformOrigin(options) {
   failTransformOrigin()
 }
 
-function failTransformOrigin(options) {
+function failTransformOrigin(options: undefined) {
   console.error(options)
   throw new Error(
     [
@@ -674,7 +672,7 @@ function failTransformOrigin(options) {
 
 function noop() {}
 
-function validateBounds(bounds) {
+function validateBounds(bounds: { left: any; top: any; bottom: any; right: any }) {
   const boundsType = typeof bounds
   if (boundsType === 'undefined' || boundsType === 'boolean') return // this is okay
   // otherwise need to be more thorough:
@@ -691,12 +689,12 @@ function validateBounds(bounds) {
     )
 }
 
-function isNumber(x) {
+function isNumber(x: unknown) {
   return Number.isFinite(x)
 }
 
 // IE 11 does not support isNaN:
-function isNaN(value) {
+function isNaN(value: unknown) {
   if (Number.isNaN) {
     return Number.isNaN(value)
   }
@@ -717,7 +715,7 @@ function autoRun() {
 
   const scripts = document.getElementsByTagName('script')
   if (!scripts) return
-  let panzoomScript
+  let panzoomScript: HTMLScriptElement
 
   for (let i = 0; i < scripts.length; ++i) {
     const x = scripts[i]
@@ -756,7 +754,7 @@ function autoRun() {
     window[globalName] = createPanZoom(el, options)
   }
 
-  function collectOptions(script) {
+  function collectOptions(script: { attributes: any }) {
     const attrs = script.attributes
     const options = {}
     for (let j = 0; j < attrs.length; ++j) {
@@ -770,7 +768,7 @@ function autoRun() {
     return options
   }
 
-  function getPanzoomAttributeNameValue(attr) {
+  function getPanzoomAttributeNameValue(attr: { name: string | string[]; value: string }) {
     if (!attr.name) return
     const isPanZoomAttribute =
       attr.name[0] === 'p' && attr.name[1] === 'z' && attr.name[2] === '-'
