@@ -34,10 +34,19 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import panzoom from '../index'
+import Panzoom from '../src/panzoom'
 onMounted(() => {
   const area = document.querySelector('.zoomable')
-  panzoom(area)
+  const panzoom = Panzoom(area, { contain: 'outside' })
+const parent = area.parentElement
+// No function bind needed
+parent.addEventListener('wheel', panzoom.zoomWithWheel)
+
+// This demo binds to shift + wheel
+parent.addEventListener('wheel', function(event) {
+  if (!event.shiftKey) return
+  panzoom.zoomWithWheel(event)
+})
 })
 </script>
 
