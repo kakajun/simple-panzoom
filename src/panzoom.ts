@@ -71,7 +71,7 @@ function Panzoom(
       'Panzoom should be called on elements that have been attached to the DOM'
     )
   }
-
+  let dimsOut // 添加一个属性来存储尺寸信息
   options = {
     ...defaultOptions,
     ...options
@@ -166,7 +166,7 @@ function Panzoom(
     opts: PanzoomOptions,
     originalEvent?: PanzoomEventDetail['originalEvent']
   ) {
-    const value = { x, y, scale, isSVG, originalEvent }
+    const value = { x, y, scale, isSVG, dimsOut, originalEvent }
     requestAnimationFrame(() => {
       if (typeof opts.animate === 'boolean') {
         if (opts.animate) {
@@ -206,9 +206,9 @@ function Panzoom(
     if (!opts.disableYAxis) {
       result.y = (opts.relative ? y : 0) + toY
     }
-
+    const dims = getDimensions(elem)
+    dimsOut = dims
     if (opts.contain) {
-      const dims = getDimensions(elem)
       const realWidth = dims.elem.width / scale
       const realHeight = dims.elem.height / scale
       const scaledWidth = realWidth * toScale
@@ -377,7 +377,8 @@ function Panzoom(
     originalEvent?: PanzoomEventDetail['originalEvent']
   ) {
     const dims = getDimensions(elem)
-
+    // 缩放时能存
+    dimsOut = dims
     // Instead of thinking of operating on the panzoom element,
     // think of operating on the area inside the panzoom
     // element's parent

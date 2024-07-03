@@ -22,6 +22,7 @@ import Panzoom from '../dist/panzoom'
 onMounted(() => {
   const area = document.querySelector('.content')
   const panzoom = Panzoom(area, { contain: 'outside' })
+
   const parent = area.parentElement
   // No function bind needed
   parent.addEventListener('wheel', panzoom.zoomWithWheel)

@@ -1,43 +1,63 @@
 <template>
   <div id="app" class="wrapper">
     <div id="lipsum" class="zoomable">
-      <img src="./target.png" id="image" style="width: 100px; height: 100px" />
+      <img src="./bg.png" id="image" style="width: 742px; height: 423px" />
+      <!-- <img src="./1.png" id="image" style="width: 742px; height: 423px" /> -->
     </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted } from 'vue'
-// import Panzoom from '../src/panzoom'
-import Panzoom from '../dist/panzoom'
+import Panzoom from '../src/panzoom'
+// import Panzoom from '../dist/panzoom'
 onMounted(() => {
   const area = document.querySelector('.zoomable')
-  const panzoom = Panzoom(area, { contain: 'inside' })
+  const panzoom = Panzoom(area, {
+    startX: 0,
+    startY: 0,
+    startScale: 1.1,
+    // contain: 'inside',
+    zoomDoubleClickSpeed: 1,
+    zoomSpeed: 1
+    // panOnlyWhenZoomed: false,
+    // disablePan: false,
+    // disableZoom: false,
+    // disableXAxis: false,
+    // disableYAxis: false
+  })
+
   const parent = area.parentElement
   // No function bind needed
   parent.addEventListener('wheel', panzoom.zoomWithWheel)
-
-  // This demo binds to shift + wheel
-  parent.addEventListener('wheel', function (event) {
-    if (!event.shiftKey) return
-    panzoom.zoomWithWheel(event)
+  // setTimeout(() => {
+  //   const dims = panzoom.setStyle('zoomable', 'style', 'none')
+  //   console.log(dims, 'dims')
+  // }, 3000)
+  area.addEventListener('panzoomchange', event => {
+    console.log(event, 'event')
   })
+
+  //  startX.value = ((1 - scale) * width) / 2 + x
+  //   startX.value = ((1 - scale) * height) / 2 + y
+  // console.log(newx, newy, '44')
 })
 </script>
 
 <style>
 .wrapper {
-  position: relative;
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  right: 30px;
+  width: calc(100% - 60px);
+  box-sizing: border-box;
   box-shadow: inset 0 0 5px rgba(223, 212, 212, 0.5);
-  margin: 30px;
-  border: 10px solid black;
+  border: 1px solid black;
   height: 800px;
   border-radius: 5px;
   cursor: move;
   overflow: hidden;
   /* 确保内容不会溢出 */
-}
-.zoomable{
-  width: 100px;
 }
 </style>
