@@ -1,4 +1,4 @@
-/*!simple-panzoom v1.0.12024年6月Tue Jun 25 2024 20:53:27 GMT+0800 (中国标准时间)制作*/
+/*!simple-panzoom v1.0.12024年7月Fri Jul 05 2024 11:44:52 GMT+0800 (中国标准时间)制作*/
 typeof window < "u" && (window.NodeList && !NodeList.prototype.forEach && (NodeList.prototype.forEach = Array.prototype.forEach), typeof window.CustomEvent != "function" && (window.CustomEvent = function(e, r) {
   r = r || { bubbles: !1, cancelable: !1, detail: null };
   var c = document.createEvent("CustomEvent");
@@ -40,7 +40,7 @@ function it(t) {
     };
   return e;
 }
-function _(t) {
+function J(t) {
   if (t.length < 2)
     return 0;
   const e = t[0], r = t[1];
@@ -62,7 +62,7 @@ typeof window < "u" && (typeof window.PointerEvent == "function" ? M = {
   move: "touchmove",
   up: "touchend touchcancel"
 }));
-function J(t, e, r, c) {
+function K(t, e, r, c) {
   M[t].split(" ").forEach((h) => {
     e.addEventListener(
       h,
@@ -71,15 +71,15 @@ function J(t, e, r, c) {
     );
   });
 }
-function K(t, e, r) {
+function Q(t, e, r) {
   M[t].split(" ").forEach((c) => {
     e.removeEventListener(c, r);
   });
 }
 const mt = typeof document < "u" && !!document.documentMode;
-let Q;
+let j;
 function gt() {
-  return Q || (Q = document.createElement("div").style);
+  return j || (j = document.createElement("div").style);
 }
 const at = ["webkit", "moz", "ms"], T = {};
 function et(t) {
@@ -121,7 +121,7 @@ function yt(t, { x: e, y: r, scale: c, isSVG: h }, y) {
     t.setAttribute("transform", f);
   }
 }
-function j(t) {
+function D(t) {
   const e = t.parentNode, r = window.getComputedStyle(t), c = window.getComputedStyle(e), h = t.getBoundingClientRect(), y = e.getBoundingClientRect();
   return {
     elem: {
@@ -235,7 +235,7 @@ function Ct(t, e) {
   }
   let f = 0, p = 0, u = 1, A = !1;
   Y(e.startScale, { animate: !1, force: !0 }), setTimeout(() => {
-    R(e.startX, e.startY, { animate: !1, force: !0 });
+    H(e.startX, e.startY, { animate: !1, force: !0 });
   });
   function C(n, i, s) {
     if (s.silent)
@@ -243,28 +243,29 @@ function Ct(t, e) {
     const d = new CustomEvent(n, { detail: i });
     t.dispatchEvent(d);
   }
-  function D(n, i, s) {
+  function L(n, i, s) {
     const d = { x: f, y: p, scale: u, isSVG: r, originalEvent: s };
-    return requestAnimationFrame(() => {
-      typeof i.animate == "boolean" && (i.animate ? wt(t, i) : x(t, "transition", "none")), i.setTransform(t, d, i), C(n, d, i), C("panzoomchange", d, i);
+    return typeof i.animate == "boolean" && (i.animate ? wt(t, i) : x(t, "transition", "none")), i.setTransform(t, d, i), requestAnimationFrame(() => {
+      const o = D(t);
+      d.dimsOut = o, C(n, d, i), C("panzoomchange", d, i);
     }), d;
   }
-  function L(n, i, s, d) {
+  function R(n, i, s, d) {
     const o = { ...e, ...d }, l = { x: f, y: p, opts: o };
     if (!o.force && (o.disablePan || o.panOnlyWhenZoomed && u === o.startScale))
       return l;
     if (n = parseFloat(n), i = parseFloat(i), o.disableXAxis || (l.x = (o.relative ? f : 0) + n), o.disableYAxis || (l.y = (o.relative ? p : 0) + i), o.contain) {
-      const a = j(t), g = a.elem.width / u, m = a.elem.height / u, E = g * s, P = m * s, v = (E - g) / 2, b = (P - m) / 2;
+      const a = D(t), g = a.elem.width / u, m = a.elem.height / u, E = g * s, P = m * s, v = (E - g) / 2, b = (P - m) / 2;
       if (o.contain === "inside") {
-        const F = (-a.elem.margin.left - a.parent.padding.left + v) / s, k = (a.parent.width - E - a.parent.padding.left - a.elem.margin.left - a.parent.border.left - a.parent.border.right + v) / s;
-        l.x = Math.max(Math.min(l.x, k), F);
-        const U = (-a.elem.margin.top - a.parent.padding.top + b) / s, G = (a.parent.height - P - a.parent.padding.top - a.elem.margin.top - a.parent.border.top - a.parent.border.bottom + b) / s;
-        l.y = Math.max(Math.min(l.y, G), U);
+        const k = (-a.elem.margin.left - a.parent.padding.left + v) / s, U = (a.parent.width - E - a.parent.padding.left - a.elem.margin.left - a.parent.border.left - a.parent.border.right + v) / s;
+        l.x = Math.max(Math.min(l.x, U), k);
+        const G = (-a.elem.margin.top - a.parent.padding.top + b) / s, _ = (a.parent.height - P - a.parent.padding.top - a.elem.margin.top - a.parent.border.top - a.parent.border.bottom + b) / s;
+        l.y = Math.max(Math.min(l.y, _), G);
       } else if (o.contain === "outside") {
-        const F = (-(E - a.parent.width) - a.parent.padding.left - a.parent.border.left - a.parent.border.right + v) / s, k = (v - a.parent.padding.left) / s;
-        l.x = Math.max(Math.min(l.x, k), F);
-        const U = (-(P - a.parent.height) - a.parent.padding.top - a.parent.border.top - a.parent.border.bottom + b) / s, G = (b - a.parent.padding.top) / s;
-        l.y = Math.max(Math.min(l.y, G), U);
+        const k = (-(E - a.parent.width) - a.parent.padding.left - a.parent.border.left - a.parent.border.right + v) / s, U = (v - a.parent.padding.left) / s;
+        l.x = Math.max(Math.min(l.x, U), k);
+        const G = (-(P - a.parent.height) - a.parent.padding.top - a.parent.border.top - a.parent.border.bottom + b) / s, _ = (b - a.parent.padding.top) / s;
+        l.y = Math.max(Math.min(l.y, _), G);
       }
     }
     return o.roundPixels && (l.x = Math.round(l.x), l.y = Math.round(l.y)), l;
@@ -275,7 +276,7 @@ function Ct(t, e) {
       return d;
     let o = e.minScale, l = e.maxScale;
     if (s.contain) {
-      const a = j(t), g = a.elem.width / u, m = a.elem.height / u;
+      const a = D(t), g = a.elem.width / u, m = a.elem.height / u;
       if (g > 1 && m > 1) {
         const E = a.parent.width - a.parent.border.left - a.parent.border.right, P = a.parent.height - a.parent.border.top - a.parent.border.bottom, v = E / g, b = P / m;
         e.contain === "inside" ? l = Math.min(l, v, b) : e.contain === "outside" && (o = Math.max(o, v, b));
@@ -283,9 +284,9 @@ function Ct(t, e) {
     }
     return d.scale = Math.min(Math.max(n, o), l), d;
   }
-  function R(n, i, s, d) {
-    const o = L(n, i, u, s);
-    return f !== o.x || p !== o.y ? (f = o.x, p = o.y, D("panzoompan", o.opts, d)) : { x: f, y: p, scale: u, isSVG: r, originalEvent: d };
+  function H(n, i, s, d) {
+    const o = R(n, i, u, s);
+    return f !== o.x || p !== o.y ? (f = o.x, p = o.y, L("panzoompan", o.opts, d)) : { x: f, y: p, scale: u, isSVG: r, originalEvent: d };
   }
   function Y(n, i, s) {
     const d = X(n, i), o = d.opts;
@@ -297,11 +298,11 @@ function Ct(t, e) {
       const m = o.focal;
       l = (m.x / n - m.x / u + f * n) / n, a = (m.y / n - m.y / u + p * n) / n;
     }
-    const g = L(l, a, n, {
+    const g = R(l, a, n, {
       relative: !1,
       force: !0
     });
-    return f = g.x, p = g.y, u = n, D("panzoomzoom", o, s);
+    return f = g.x, p = g.y, u = n, L("panzoomzoom", o, s);
   }
   function nt(n, i) {
     const s = { ...e, animate: !0, ...i };
@@ -313,8 +314,8 @@ function Ct(t, e) {
   function dt(n) {
     return nt(!1, n);
   }
-  function H(n, i, s, d) {
-    const o = j(t), l = {
+  function B(n, i, s, d) {
+    const o = D(t), l = {
       width: o.parent.width - o.parent.padding.left - o.parent.padding.right - o.parent.border.left - o.parent.border.right,
       height: o.parent.height - o.parent.padding.top - o.parent.padding.bottom - o.parent.border.top - o.parent.border.bottom
     };
@@ -336,60 +337,60 @@ function Ct(t, e) {
       u * Math.exp(o * s.step / 3),
       s
     ).scale;
-    return H(l, n, s, n);
+    return B(l, n, s, n);
   }
   function ft(n) {
     const i = { ...e, animate: !0, force: !0, ...n };
     u = X(i.startScale, i).scale;
-    const s = L(i.startX, i.startY, u, i);
-    return f = s.x, p = s.y, D("panzoomreset", i);
+    const s = R(i.startX, i.startY, u, i);
+    return f = s.x, p = s.y, L("panzoomreset", i);
   }
-  let z, S, O, $, rt, N;
+  let z, O, S, $, rt, N;
   const w = [];
-  function B(n) {
+  function V(n) {
     if (Et(n.target, e))
       return;
-    tt(w, n), A = !0, e.handleStartEvent(n), z = f, S = p, C(
+    tt(w, n), A = !0, e.handleStartEvent(n), z = f, O = p, C(
       "panzoomstart",
       { x: f, y: p, scale: u, isSVG: r, originalEvent: n },
       e
     );
     const i = it(w);
-    O = i.clientX, $ = i.clientY, rt = u, N = _(w);
+    S = i.clientX, $ = i.clientY, rt = u, N = J(w);
   }
-  function V(n) {
-    if (!A || z === void 0 || S === void 0 || O === void 0 || $ === void 0)
+  function Z(n) {
+    if (!A || z === void 0 || O === void 0 || S === void 0 || $ === void 0)
       return;
     tt(w, n);
     const i = it(w), s = w.length > 1;
     let d = u;
     if (s) {
-      N === 0 && (N = _(w));
-      const o = _(w) - N;
-      d = X(o * e.step / 80 + rt).scale, H(d, i, { animate: !1 }, n);
+      N === 0 && (N = J(w));
+      const o = J(w) - N;
+      d = X(o * e.step / 80 + rt).scale, B(d, i, { animate: !1 }, n);
     }
-    (!s || e.pinchAndPan) && R(
-      z + (i.clientX - O) / d,
-      S + (i.clientY - $) / d,
+    (!s || e.pinchAndPan) && H(
+      z + (i.clientX - S) / d,
+      O + (i.clientY - $) / d,
       {
         animate: !1
       },
       n
     );
   }
-  function Z(n) {
+  function q(n) {
     w.length === 1 && C(
       "panzoomend",
       { x: f, y: p, scale: u, isSVG: r, originalEvent: n },
       e
-    ), pt(w, n), A && (A = !1, z = S = O = $ = void 0);
+    ), pt(w, n), A && (A = !1, z = O = S = $ = void 0);
   }
-  let q = !1;
+  let F = !1;
   function ot() {
-    q || (q = !0, J("down", e.canvas ? c : t, B), J("move", document, V, { passive: !0 }), J("up", document, Z, { passive: !0 }));
+    F || (F = !0, K("down", e.canvas ? c : t, V), K("move", document, Z, { passive: !0 }), K("up", document, q, { passive: !0 }));
   }
   function ht() {
-    q = !1, K("down", e.canvas ? c : t, B), K("move", document, V), K("up", document, Z);
+    F = !1, Q("down", e.canvas ? c : t, V), Q("move", document, Z), Q("up", document, q);
   }
   return e.noBind || ot(), {
     bind: ot,
@@ -398,10 +399,10 @@ function Ct(t, e) {
     getPan: () => ({ x: f, y: p }),
     getScale: () => u,
     getOptions: () => At(e),
-    handleDown: B,
-    handleMove: V,
-    handleUp: Z,
-    pan: R,
+    handleDown: V,
+    handleMove: Z,
+    handleUp: q,
+    pan: H,
     reset: ft,
     resetStyle: h,
     setOptions: y,
@@ -409,7 +410,7 @@ function Ct(t, e) {
     zoom: Y,
     zoomIn: lt,
     zoomOut: dt,
-    zoomToPoint: H,
+    zoomToPoint: B,
     zoomWithWheel: ut
   };
 }
