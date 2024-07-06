@@ -175,13 +175,24 @@ function Panzoom(
       }
     }
     opts.setTransform(elem, value, opts)
-    requestAnimationFrame(() => {
+    function setTrigger() {
       // 加获取dimsOut的尺寸
       const dims = getDimensions(elem)
       value.dimsOut = dims
       trigger(eventName, value, opts)
       trigger('panzoomchange', value, opts)
-    })
+    }
+    // 有动画效果的需等动画执行完毕
+    if (opts.animate) {
+      setTimeout(() => {
+        setTrigger()
+      }, opts.duration + 50)
+    } else {
+      requestAnimationFrame(() => {
+        setTrigger()
+      })
+    }
+
     return value
   }
 

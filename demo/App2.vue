@@ -1,4 +1,5 @@
 <template>
+  <button @click="clickReset">还原</button>
   <div id="app" class="wrapper">
     <div id="lipsum" class="zoomable">
       <img src="./bg.png" id="image" style="width: 742px; height: 423px" />
@@ -11,11 +12,12 @@
 import { onMounted } from 'vue'
 import Panzoom from '../src/panzoom'
 // import Panzoom from '../dist/panzoom'
+let panzoomInstance = null
 onMounted(() => {
   const area = document.querySelector('.zoomable')
-  const panzoom = Panzoom(area, {
-    startX: 0,
-    startY: 0,
+  panzoomInstance = Panzoom(area, {
+    startX: 200,
+    startY: 200,
     startScale: 1.1,
     // contain: 'inside',
     zoomDoubleClickSpeed: 1,
@@ -29,19 +31,22 @@ onMounted(() => {
 
   const parent = area.parentElement
   // No function bind needed
-  parent.addEventListener('wheel', panzoom.zoomWithWheel)
+  parent.addEventListener('wheel', panzoomInstance.zoomWithWheel)
   // setTimeout(() => {
-  //   const dims = panzoom.setStyle('zoomable', 'style', 'none')
+  //   const dims = panzoomInstance.setStyle('zoomable', 'style', 'none')
   //   console.log(dims, 'dims')
   // }, 3000)
   area.addEventListener('panzoomchange', event => {
-    console.log(event, 'event')
+    console.log(event.detail.dimsOut.elem, 'event')
   })
 
   //  startX.value = ((1 - scale) * width) / 2 + x
   //   startX.value = ((1 - scale) * height) / 2 + y
   // console.log(newx, newy, '44')
 })
+const clickReset = () => {
+  panzoomInstance.reset()
+}
 </script>
 
 <style>
