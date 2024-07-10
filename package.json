@@ -22,8 +22,6 @@
     "url": "https://github.com/kakajun/simple-panzoom"
   },
   "dependencies": {
-    "ngraph.events": "^1.2.2",
-    "wheel": "^1.0.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.10.3",
