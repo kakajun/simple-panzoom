@@ -1,9 +1,10 @@
 {
   "name": "simple-panzoom",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Extensible, mobile friendly pan and zoom framework (supports DOM and SVG).",
-  "main": "index.js",
+  "main": "dist/panzoom.cjs",
+  "module": "dist/panzoom.js",
   "scripts": {
     "dev": "vite",
     "test": "vitest",
@@ -21,8 +22,7 @@
     "type": "git",
     "url": "https://github.com/kakajun/simple-panzoom"
   },
-  "dependencies": {
-  },
+
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.10.3",
     "@types/node": "^20.14.7",
