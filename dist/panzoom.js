@@ -1,4 +1,4 @@
-/*!simple-panzoom v1.0.12024年7月Fri Jul 05 2024 11:44:52 GMT+0800 (中国标准时间)制作*/
+/*!simple-panzoom v1.0.22024年7月Wed Jul 10 2024 21:12:39 GMT+0800 (中国标准时间)制作*/
 typeof window < "u" && (window.NodeList && !NodeList.prototype.forEach && (NodeList.prototype.forEach = Array.prototype.forEach), typeof window.CustomEvent != "function" && (window.CustomEvent = function(e, r) {
   r = r || { bubbles: !1, cancelable: !1, detail: null };
   var c = document.createEvent("CustomEvent");
@@ -245,9 +245,15 @@ function Ct(t, e) {
   }
   function L(n, i, s) {
     const d = { x: f, y: p, scale: u, isSVG: r, originalEvent: s };
-    return typeof i.animate == "boolean" && (i.animate ? wt(t, i) : x(t, "transition", "none")), i.setTransform(t, d, i), requestAnimationFrame(() => {
-      const o = D(t);
-      d.dimsOut = o, C(n, d, i), C("panzoomchange", d, i);
+    typeof i.animate == "boolean" && (i.animate ? wt(t, i) : x(t, "transition", "none")), i.setTransform(t, d, i);
+    function o() {
+      const l = D(t);
+      d.dimsOut = l, C(n, d, i), C("panzoomchange", d, i);
+    }
+    return i.animate ? setTimeout(() => {
+      o();
+    }, i.duration + 50) : requestAnimationFrame(() => {
+      o();
     }), d;
   }
   function R(n, i, s, d) {
