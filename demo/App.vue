@@ -1,39 +1,41 @@
 <template>
   <div id="app">
-    <div class="log"></div>
-    <div class="container-parent">
-      <div class="container">
-        <div class="content">
-          <img
-            src="./target.png"
-            id="image"
-            style="width: 100%; height: auto"
-          />
-        </div>
-      </div>
+    <ul class="tabs">
+      <li
+        v-for="tab in tabs"
+        :key="tab.name"
+        :class="{ active: activeTab === tab.name }"
+        @click="switchTab(tab.name)"
+      >
+        {{ tab.title }}
+      </li>
+    </ul>
+    <div class="tab-content">
+      <component :is="activeTab"></component>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-// import Panzoom from '../src/panzoom'
-import Panzoom from '../dist/panzoom'
-onMounted(() => {
-  const area = document.querySelector('.content')
-  const panzoom = Panzoom(area, { contain: 'outside' })
+import tab1 from './tab1'
+import tab2 from './tab2'
+import tab3 from './tab3'
+const activeTab = ref('tab1')
+const tabs = [
+  { name: 'tab1', title: 'Tab 1' },
+  { name: 'tab2', title: 'Tab 2' },
+  { name: 'tab3', title: 'Tab 3' }
+]
 
-  const parent = area.parentElement
-  // No function bind needed
-  parent.addEventListener('wheel', panzoom.zoomWithWheel)
-})
+const switchTab = tabName => {
+  activeTab.value = tabName
+}
 </script>
 
 <style>
 * {
   box-sizing: border-box;
 }
-
 body {
   position: relative;
   background-color: #eee;
@@ -43,37 +45,25 @@ body {
   overflow: hidden;
 }
 
-.container-parent {
-  position: relative;
-  box-shadow: inset 0 0 5px rgba(223, 212, 212, 0.5);
-  margin: 30px;
-  /* padding: 20px; */
-  /* 调整padding以适应内容 */
-  border: 10px solid black;
-  border-radius: 5px;
-  cursor: move;
-  overflow: hidden;
-  /* 确保内容不会溢出 */
+.tabs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
-
-.container {
-  width: 100%;
-  height: 600px;
-  position: relative;
-  transform-origin: 0 0;
-  /* 设置缩放原点为左上角 */
-  transform: translateZ(0);
-  /* 开启硬件加速 */
+.tabs li {
+  display: inline-block;
+  margin-right: 10px;
+  padding: 10px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
 }
-
-.content {
-  width: 100px;
-  height: 100px;
+.tabs li.active {
+  background-color: #e0e0e0;
 }
-
-.log {
-  position: absolute;
-  left: 0;
-  top: 0;
+.tab-content {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-top: none;
 }
 </style>

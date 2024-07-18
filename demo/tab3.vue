@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div >
     <div id="lipsum" class="zoomable">
       <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam enim

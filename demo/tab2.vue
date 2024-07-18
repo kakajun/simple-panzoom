@@ -1,6 +1,6 @@
 <template>
   <button @click="clickReset">还原</button>
-  <div id="app" class="wrapper">
+  <div  class="wrapper">
     <div id="lipsum" class="zoomable">
       <img src="./bg.png" id="image" style="width: 742px; height: 423px" />
       <!-- <img src="./1.png" id="image" style="width: 742px; height: 423px" /> -->
@@ -38,6 +38,7 @@ onMounted(() => {
   // }, 3000)
   area.addEventListener('panzoomchange', event => {
     console.log(event.detail.dimsOut.elem, 'event')
+    console.log(event.detail, 'detail')
   })
 
   //  startX.value = ((1 - scale) * width) / 2 + x
