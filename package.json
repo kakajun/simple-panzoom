@@ -11,6 +11,9 @@
     "test": "vitest",
     "build": "vite build"
   },
+    "files": [
+    "dist"
+  ],
   "keywords": [
     "dom",
     "svg",
