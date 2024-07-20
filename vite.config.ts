@@ -2,7 +2,9 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
+
 import pkg from './package.json'
+import dts from 'vite-plugin-dts'
 const banner = `/*!${pkg.name} v${pkg.version}${new Date().getFullYear()}年${
   new Date().getMonth() + 1
 }月${new Date()}制作*/`
@@ -11,7 +13,7 @@ export default defineConfig({
   test: {
     environment: 'happy-dom' // or 'jsdom', 'node'
   },
-  plugins: [vue()],
+  plugins: [vue(), dts({ rollupTypes: true })],
   build: {
     outDir: 'dist',
     // minify: true, // 不压缩代码,方便开发调试
