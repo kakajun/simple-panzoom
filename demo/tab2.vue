@@ -1,6 +1,7 @@
 <template>
   <button @click="clickReset">还原</button>
-  <div  class="wrapper">
+  <button class="btn zoomout-btn" @click.stop="zoomOut">缩小</button>
+  <div class="wrapper">
     <div id="lipsum" class="zoomable">
       <img src="./bg.png" id="image" style="width: 742px; height: 423px" />
       <!-- <img src="./1.png" id="image" style="width: 742px; height: 423px" /> -->
@@ -47,6 +48,10 @@ onMounted(() => {
 })
 const clickReset = () => {
   panzoomInstance.reset()
+}
+
+const zoomOut = () => {
+  panzoomInstance.zoomOut()
 }
 </script>
 
