@@ -217,6 +217,7 @@ export interface CurrentValues {
   y: number
   scale: number
   isSVG?: boolean
+  dimsOut: object
 }
 
 export interface PanzoomObject {
@@ -281,7 +282,11 @@ export interface PanzoomObject {
    * panzoom.pan(10, 10, { relative: true })
    * ```
    */
-  pan: (x: number | string, y: number | string, panOptions?: PanOptions) => CurrentValues
+  pan: (
+    x: number | string,
+    y: number | string,
+    panOptions?: PanOptions
+  ) => CurrentValues
   /**
    * Reset the pan and zoom to startX, startY, and startScale.
    * Animates by default, ignoring the global option.

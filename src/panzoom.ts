@@ -166,7 +166,7 @@ function Panzoom(
     opts: PanzoomOptions,
     originalEvent?: PanzoomEventDetail['originalEvent']
   ) {
-    const value = { x, y, scale, isSVG, originalEvent }
+    const value = { x, y, scale, isSVG, originalEvent, dimsOut: {} }
     if (typeof opts.animate === 'boolean') {
       if (opts.animate) {
         setTransition(elem, opts)

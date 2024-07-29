@@ -11,6 +11,7 @@
     "lib": ["esnext", "dom"],
     "skipLibCheck": true
   },
+  "include": ["src"],
   "vueCompilerOptions": {
     "target": 3
   }
