@@ -1,24 +1,41 @@
 <template>
   <button @click="clickReset">还原</button>
-  <div  class="wrapper">
+  <button class="btn zoomout-btn" @click.stop="zoomOut">缩小</button>
+  <div class="wrapper">
     <div id="lipsum" class="zoomable">
-      <img src="./bg.png" id="image" style="width: 742px; height: 423px" />
-      <!-- <img src="./1.png" id="image" style="width: 742px; height: 423px" /> -->
+      <div :style="{ width: canvasWidth, height: canvasHeight }">
+        <img src="./bg.png" id="image" class="img-content" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref, reactive, computed } from 'vue'
 import Panzoom from '../src/panzoom'
 // import Panzoom from '../dist/panzoom'
 let panzoomInstance = null
+const zoomStartX = ref(0)
+const zoomStartY = ref(0)
+const props = reactive({
+  canvasWidth: 1920, // 画布宽度
+  canvasHeight: 1080, // 画布高度
+  paddingRatio: 0.2 // 内边距比例
+})
+
+const canvasWidth = computed(() => props.canvasWidth + 'px')
+const canvasHeight = computed(() => props.canvasHeight + 'px')
+const rectWidth = ref(800)
+const rectHeight = ref(400)
 onMounted(() => {
   const area = document.querySelector('.zoomable')
+  const scale = calculateTransform()
+  console.log(scale, 'scale')
   panzoomInstance = Panzoom(area, {
-    startX: 200,
-    startY: 200,
-    startScale: 1.1,
+    startX: zoomStartX.value,
+    startY: zoomStartY.value,
+    animate: false,
+    startScale: scale,
     // contain: 'inside',
     zoomDoubleClickSpeed: 1,
     zoomSpeed: 1
@@ -39,14 +56,42 @@ onMounted(() => {
   area.addEventListener('panzoomchange', event => {
     console.log(event.detail.dimsOut.elem, 'event')
     console.log(event.detail, 'detail')
+    // const { scale, dimsOut } = event.detail
+    //     if (dimsOut) {
+    //       // emit('update:scale', scale)
+    //       // ownScale.value = scale
+    //       const left = (dimsOut.parent.left - dimsOut.elem.left) / scale
+    //       const top = (dimsOut.parent.top - dimsOut.elem.top) / scale
+    //       startX.value = left
+
+    //       startY.value = top
+    //     }
   })
 
   //  startX.value = ((1 - scale) * width) / 2 + x
   //   startX.value = ((1 - scale) * height) / 2 + y
   // console.log(newx, newy, '44')
 })
+
+/**
+ * @desc: 居中算法
+ */
+const calculateTransform = () => {
+  const scaleX =
+    (rectWidth.value * (1 - props.paddingRatio)) / props.canvasWidth
+  const scaleY =
+    (rectHeight.value * (1 - props.paddingRatio)) / props.canvasHeight
+  const scale = Math.min(scaleX, scaleY)
+  zoomStartX.value = rectWidth.value / 2 - props.canvasWidth / 2
+  zoomStartY.value = rectHeight.value / 2 - props.canvasHeight / 2
+  return scale
+}
 const clickReset = () => {
   panzoomInstance.reset()
+}
+
+const zoomOut = () => {
+  panzoomInstance.zoomOut()
 }
 </script>
 
@@ -55,15 +100,18 @@ const clickReset = () => {
   position: absolute;
   top: 100px;
   left: 100px;
-  right: 30px;
-  width: calc(100% - 60px);
+  width: v-bind(rectWidth + 'px');
+  height: v-bind(rectHeight + 'px');
   box-sizing: border-box;
   box-shadow: inset 0 0 5px rgba(223, 212, 212, 0.5);
   border: 1px solid black;
-  height: 800px;
   border-radius: 5px;
   cursor: move;
   overflow: hidden;
   /* 确保内容不会溢出 */
+}
+.img-content {
+  width: 100%;
+  height: 100%;
 }
 </style>
