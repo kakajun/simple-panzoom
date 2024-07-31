@@ -13,6 +13,7 @@ export interface PanzoomEventDetail {
   y: number
   scale: number
   isSVG: boolean
+  dimsOut: object
   originalEvent: PointerEvent | TouchEvent | MouseEvent
 }
 
