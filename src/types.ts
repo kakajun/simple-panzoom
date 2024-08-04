@@ -1,5 +1,7 @@
 import { setTransform, getDimensions } from './css'
 
+export type Dimensions = ReturnType<typeof getDimensions>
+
 export type PanzoomEvent =
   | 'panzoomstart'
   | 'panzoomchange'
@@ -13,7 +15,7 @@ export interface PanzoomEventDetail {
   y: number
   scale: number
   isSVG: boolean
-  dimsOut: object
+  dimsOut: Dimensions
   originalEvent: PointerEvent | TouchEvent | MouseEvent
 }
 
@@ -401,5 +403,3 @@ export interface PanzoomObject {
    */
   zoomWithWheel: (event: WheelEvent, zoomOptions?: ZoomOptions) => CurrentValues
 }
-
-export type Dimensions = ReturnType<typeof getDimensions>

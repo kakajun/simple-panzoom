@@ -15,7 +15,8 @@ import type {
   PanzoomEventDetail,
   PanzoomObject,
   PanzoomOptions,
-  ZoomOptions
+  ZoomOptions,
+  Dimensions
 } from './types'
 import { addPointer, getDistance, getMiddle, removePointer } from './pointers'
 import { destroyPointer, eventNames, onPointer } from './events'
@@ -166,7 +167,8 @@ function Panzoom(
     opts: PanzoomOptions,
     originalEvent?: PanzoomEventDetail['originalEvent']
   ) {
-    const value = { x, y, scale, isSVG, originalEvent, dimsOut: {} }
+    let dimsOut = {} as Dimensions
+    const value = { x, y, scale, isSVG, originalEvent, dimsOut }
     if (typeof opts.animate === 'boolean') {
       if (opts.animate) {
         setTransition(elem, opts)
