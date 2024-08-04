@@ -1,6 +1,6 @@
 {
   "name": "simple-panzoom",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "description": "Extensible, mobile friendly pan and zoom framework (supports DOM and SVG).",
   "main": "dist/panzoom.cjs",
