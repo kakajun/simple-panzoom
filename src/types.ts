@@ -1,4 +1,4 @@
-import { setTransform } from './css'
+import { setTransform, getDimensions } from './css'
 
 export type PanzoomEvent =
   | 'panzoomstart'
@@ -401,3 +401,5 @@ export interface PanzoomObject {
    */
   zoomWithWheel: (event: WheelEvent, zoomOptions?: ZoomOptions) => CurrentValues
 }
+
+export type Dimensions = ReturnType<typeof getDimensions>
