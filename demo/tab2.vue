@@ -18,15 +18,15 @@ let panzoomInstance = null
 const zoomStartX = ref(0)
 const zoomStartY = ref(0)
 const props = reactive({
-  canvasWidth: 1920, // 画布宽度
-  canvasHeight: 1080, // 画布高度
+  canvasWidth: 2920, // 画布宽度
+  canvasHeight: 1980, // 画布高度
   paddingRatio: 0.2 // 内边距比例
 })
 
 const canvasWidth = computed(() => props.canvasWidth + 'px')
 const canvasHeight = computed(() => props.canvasHeight + 'px')
-const rectWidth = ref(800)
-const rectHeight = ref(400)
+const rectWidth = ref(1400)
+const rectHeight = ref(800)
 onMounted(() => {
   const area = document.querySelector('.zoomable')
   const scale = calculateTransform()
@@ -83,7 +83,17 @@ const calculateTransform = () => {
     (rectHeight.value * (1 - props.paddingRatio)) / props.canvasHeight
   const scale = Math.min(scaleX, scaleY)
   zoomStartX.value = rectWidth.value / 2 - props.canvasWidth / 2
-  zoomStartY.value = rectHeight.value / 2 - props.canvasHeight / 2
+  if (scale < 1) {
+    zoomStartY.value =
+      ((props.canvasHeight * scale) / 2 - props.canvasHeight / 2) / scale -
+      (props.canvasHeight * scale - rectHeight.value) / scale / 2
+  } else if (scale > 1) {
+    zoomStartY.value =
+      (props.canvasHeight * scale - props.canvasHeight) / 2 / scale +
+      (rectHeight.value - props.canvasHeight * scale) / scale / 2
+  } else {
+    zoomStartY.value = 0
+  }
   return scale
 }
 const clickReset = () => {
