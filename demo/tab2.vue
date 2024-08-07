@@ -1,8 +1,10 @@
 <template>
   <button @click="clickReset">还原</button>
   <button class="btn zoomout-btn" @click.stop="zoomOut">缩小</button>
+  <span>缩放:</span>
+  {{ scaleRef }}
   <div class="wrapper">
-    <div id="lipsum" class="zoomable">
+    <div id="edit" class="zoomable">
       <div :style="{ width: canvasWidth, height: canvasHeight }">
         <img src="./bg.png" id="image" class="img-content" />
       </div>
@@ -18,24 +20,23 @@ let panzoomInstance = null
 const zoomStartX = ref(0)
 const zoomStartY = ref(0)
 const props = reactive({
-  canvasWidth: 2920, // 画布宽度
-  canvasHeight: 1980, // 画布高度
+  canvasWidth: 1920, // 画布宽度
+  canvasHeight: 1080, // 画布高度
   paddingRatio: 0.2 // 内边距比例
 })
-
+const scaleRef = ref(1)
 const canvasWidth = computed(() => props.canvasWidth + 'px')
 const canvasHeight = computed(() => props.canvasHeight + 'px')
-const rectWidth = ref(1400)
-const rectHeight = ref(800)
+const rectWidth = ref(700)
+const rectHeight = ref(400)
 onMounted(() => {
   const area = document.querySelector('.zoomable')
-  const scale = calculateTransform()
-  console.log(scale, 'scale')
+  scaleRef.value = calculateTransform()
   panzoomInstance = Panzoom(area, {
     startX: zoomStartX.value,
     startY: zoomStartY.value,
     animate: false,
-    startScale: scale,
+    startScale: scaleRef.value,
     // contain: 'inside',
     zoomDoubleClickSpeed: 1,
     zoomSpeed: 1
@@ -47,7 +48,19 @@ onMounted(() => {
   })
 
   const parent = area.parentElement
-  // No function bind needed
+  const rectParent = parent.getBoundingClientRect()
+  // const scale= scaleRef.value
+  // const clientX = -props.canvasWidth / scaleRef.value / 2
+  // const clientY = -props.canvasHeight / scaleRef.value / 2
+
+  // // Convert the mouse point from it's position over the
+  // // effective area before the scale to the position
+  // // over the effective area after the scale.
+  // const focal = {
+  //   x: (clientX / rectWidth.value) * (rectWidth.value * scale),
+  //   y: (clientY / rectHeight.value) * (rectHeight.value * scale)
+  // }
+  // panzoomInstance.zoom(0.5, { animate: false, focal })
   parent.addEventListener('wheel', panzoomInstance.zoomWithWheel)
   // setTimeout(() => {
   //   const dims = panzoomInstance.setStyle('zoomable', 'style', 'none')
@@ -81,18 +94,36 @@ const calculateTransform = () => {
     (rectWidth.value * (1 - props.paddingRatio)) / props.canvasWidth
   const scaleY =
     (rectHeight.value * (1 - props.paddingRatio)) / props.canvasHeight
+  console.log(scaleX, scaleY, 'sssssssss')
+
   const scale = Math.min(scaleX, scaleY)
-  zoomStartX.value = rectWidth.value / 2 - props.canvasWidth / 2
-  if (scale < 1) {
+  // if (scale < 1) {
+  //   zoomStartY.value =
+  //     ((props.canvasHeight * scale) / 2 - props.canvasHeight / 2) / scale -
+  //     (props.canvasHeight * scale - rectHeight.value) / scale / 2
+  // } else if (scale > 1) {
+  //   zoomStartY.value =
+  //     (props.canvasHeight * scale - props.canvasHeight) / 2 / scale +
+  //     (rectHeight.value - props.canvasHeight * scale) / scale / 2
+  // } else {
+  //   zoomStartY.value = 0
+  // }
+
+  const diffHorizontal = (props.canvasWidth * scale - props.canvasWidth) / 2
+  const diffVertical = (props.canvasHeight * scale - props.canvasHeight) / 2
+  const minX = diffHorizontal / scale
+  const minY = diffVertical / scale
+  zoomStartY.value = minY
+  if (scale == scaleX) {
+    // zoomStartX.value = rectWidth.value / 2 - props.canvasWidth / 2
+    zoomStartX.value = minX + (props.paddingRatio * rectWidth.value) / scale / 2
     zoomStartY.value =
-      ((props.canvasHeight * scale) / 2 - props.canvasHeight / 2) / scale -
-      (props.canvasHeight * scale - rectHeight.value) / scale / 2
-  } else if (scale > 1) {
-    zoomStartY.value =
-      (props.canvasHeight * scale - props.canvasHeight) / 2 / scale +
-      (rectHeight.value - props.canvasHeight * scale) / scale / 2
+      minY + rectHeight.value / 2 / scale - props.canvasHeight / 2
   } else {
-    zoomStartY.value = 0
+    zoomStartX.value =
+      minX + rectWidth.value / 2 / scale - props.canvasWidth / 2
+    zoomStartY.value =
+      minY + (props.paddingRatio * rectHeight.value) / scale / 2
   }
   return scale
 }
@@ -119,6 +150,11 @@ const zoomOut = () => {
   cursor: move;
   overflow: hidden;
   /* 确保内容不会溢出 */
+}
+
+#edit {
+  width: v-bind(props.canvasWidth + 'px');
+  height: v-bind(props.canvasHeight + 'px');
 }
 .img-content {
   width: 100%;
