@@ -1,17 +1,18 @@
 {
   "name": "simple-panzoom",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "description": "Extensible, mobile friendly pan and zoom framework (supports DOM and SVG).",
   "main": "dist/panzoom.cjs",
   "module": "dist/panzoom.js",
   "types": "dist/panzoom.d.ts",
+  "typings": "dist/panzoom.d.ts",
   "scripts": {
     "dev": "vite",
     "test": "vitest",
     "build": "vite build"
   },
-    "files": [
+  "files": [
     "dist",
     "src"
   ],
@@ -27,7 +28,6 @@
     "type": "git",
     "url": "https://github.com/kakajun/simple-panzoom"
   },
-
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.10.3",
     "@types/node": "^20.14.7",
@@ -47,7 +47,7 @@
     "typescript": "^5.5.2",
     "uglify-js": "^3.18.0",
     "vite": "^5.3.1",
-     "vite-plugin-dts": "3.9.1",
+    "vite-plugin-dts": "3.9.1",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^1.6.0",
     "vue": "^3.4.29",

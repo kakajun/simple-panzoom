@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 /**
  * Panzoom for panning and zooming elements using CSS transforms
  * https://github.com/timmywil/panzoom
@@ -167,7 +168,7 @@ function Panzoom(
     opts: PanzoomOptions,
     originalEvent?: PanzoomEventDetail['originalEvent']
   ) {
-    let dimsOut = {} as Dimensions
+    const dimsOut = {} as Dimensions
     const value = { x, y, scale, isSVG, originalEvent, dimsOut }
     if (typeof opts.animate === 'boolean') {
       if (opts.animate) {

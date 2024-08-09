@@ -4,9 +4,11 @@
   <span>缩放:</span>
   {{ scaleRef }}
   <div class="wrapper">
-    <div id="edit" class="zoomable">
-      <div :style="{ width: canvasWidth, height: canvasHeight }">
-        <img src="./bg.png" id="image" class="img-content" />
+    <div style="position: relative">
+      <div id="edit" class="zoomable">
+        <div :style="{ width: canvasWidth, height: canvasHeight }">
+          <img src="./bg.png" id="image" class="img-content" />
+        </div>
       </div>
     </div>
   </div>
@@ -22,6 +24,8 @@ const zoomStartY = ref(0)
 const props = reactive({
   canvasWidth: 1920, // 画布宽度
   canvasHeight: 1080, // 画布高度
+  // canvasWidth: 920, // 画布宽度
+  // canvasHeight: 580, // 画布高度
   paddingRatio: 0.2 // 内边距比例
 })
 const scaleRef = ref(1)
@@ -67,8 +71,10 @@ onMounted(() => {
   //   console.log(dims, 'dims')
   // }, 3000)
   area.addEventListener('panzoomchange', event => {
-    console.log(event.detail.dimsOut.elem, 'event')
-    console.log(event.detail, 'detail')
+    const { scale, dimsOut } = event.detail
+    // console.log(event.detail.dimsOut.elem, 'event')
+    // console.log(event.detail, 'detail')
+    scaleRef.value = scale
     // const { scale, dimsOut } = event.detail
     //     if (dimsOut) {
     //       // emit('update:scale', scale)

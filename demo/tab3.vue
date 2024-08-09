@@ -67,7 +67,7 @@ onMounted(() => {
       // const top = (dimsOut.parent.top - dimsOut.elem.top) / scale
       // zoomStartX.value = left
       // zoomStartY.value = top
-      // scaleRef.value = scale
+      scaleRef.value = scale
       console.log(scale, 'scale')
     }
   })
