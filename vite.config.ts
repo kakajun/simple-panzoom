@@ -16,7 +16,7 @@ export default defineConfig({
   plugins: [vue(), dts({ rollupTypes: true })],
   build: {
     outDir: 'dist',
-    // minify: true, // 不压缩代码,方便开发调试
+    minify: false, // 不压缩代码,方便开发调试
     lib: {
       entry: resolve(__dirname, 'src/panzoom.ts'),
       name: 'panzoom',
