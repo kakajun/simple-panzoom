@@ -97,7 +97,7 @@
         // 绑定 pointerdown
         image.addEventListener('pointerdown', function (e) {
           e.preventDefault(); // 添加这一行来阻止默认行为
-          debugger
+
           isPointerdown = true;
           image.setPointerCapture(e.pointerId);
           point = { x: e.clientX, y: e.clientY };

@@ -677,7 +677,7 @@ function Panzoom(elem, options) {
     // think of operating on the area inside the panzoom
     // element's parent
     // Subtract padding and border
-    debugger
+
     var effectiveArea = {
       width:
         dims.parent.width -
